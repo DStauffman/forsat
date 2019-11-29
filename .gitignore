@@ -1,0 +1,87 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# =========================
+# Operating System Files #
+# =========================
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# =========================
+# Compiled source #
+# =========================
+*.pyc
+*.o
+*.obj
+*.mod
+*.exe
+
+# =========================
+# LaTeX Files #
+# =========================
+*/docs/tex/**/*.aux
+*/docs/tex/**/*.bbl
+*/docs/tex/**/*.bcf
+*/docs/tex/**/*.blg
+*/docs/tex/**/*.dvi
+*/docs/tex/**/*.gz
+*/docs/tex/**/*.hst
+*/docs/tex/**/*.lof
+*/docs/tex/**/*.log
+*/docs/tex/**/*.lot
+*/docs/tex/**/*.out
+*/docs/tex/**/*.pdf
+*/docs/tex/**/*.run.xml
+*/docs/tex/**/*.toc
+*/docs/tex/**/*.tcp
+*/docs/tex/**/*.tps
+*/docs/tex/**/*.ver
+
+# beamer files
+*/docs/tex/**/*.nav
+*/docs/tex/**/*.snm
+*/docs/tex/**/*.vrb
+
+# =========================
+# Folder/Files #
+# =========================
+output/*
+temp/*
+build/*
