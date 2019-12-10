@@ -1,0 +1,56 @@
+# GCC
+FC      = gfortran
+FCFLAGS = -Og -g -Wall -fimplicit-none -fcheck=all -fbacktrace -Wno-maybe-uninitialized -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -cpp -D UNIT_TESTING
+
+# configuration
+SRCDIR = ../source
+OBJDIR = test_builds
+OBJLOC = ../build
+OBJS   = \
+       asserts.obj \
+       constants.obj \
+       enums.obj \
+       logging.obj \
+       matlab.obj \
+       operators.obj \
+       parameters.obj \
+       prng_nums.obj \
+       stats.obj \
+       text_input.obj \
+       text_output.obj \
+       utils.obj \
+
+# no implicit rules
+.SUFFIXES:
+
+# auxiliary programs
+RM:=rm -f
+MKDIR:=mkdir -p
+TEST:=test -d
+
+# create the build directory; define slashed version for convenience with short names
+ifneq ($(OBJDIR),)
+  $(shell $(TEST) $(OBJDIR) || $(MKDIR) $(OBJDIR))
+  B:=$(OBJDIR)/
+else
+  B:=./
+endif
+ifneq ($(SRCDIR),)
+  S:=$(SRCDIR)/
+else
+  S:=./
+endif
+
+# main executable
+
+# object file implicit rules
+$(B)%.obj : %.f90
+	$(FC) -c $(FCFLAGS) -J$(OBJDIR) -I$(OBJDIR) -I$(OBJLOC) -o $@ $<
+
+# object file dependencies
+
+# clean-up
+clean :
+	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod run_test_*.exe
+
+.PHONY : clean all
