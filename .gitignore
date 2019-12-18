@@ -47,41 +47,41 @@ Temporary Items
 # =========================
 # Compiled source #
 # =========================
-*.pyc
 *.o
 *.obj
 *.mod
+*.smod
 *.exe
 
 # =========================
 # LaTeX Files #
 # =========================
-*/docs/tex/**/*.aux
-*/docs/tex/**/*.bbl
-*/docs/tex/**/*.bcf
-*/docs/tex/**/*.blg
-*/docs/tex/**/*.dvi
-*/docs/tex/**/*.gz
-*/docs/tex/**/*.hst
-*/docs/tex/**/*.lof
-*/docs/tex/**/*.log
-*/docs/tex/**/*.lot
-*/docs/tex/**/*.out
-*/docs/tex/**/*.pdf
-*/docs/tex/**/*.run.xml
-*/docs/tex/**/*.toc
-*/docs/tex/**/*.tcp
-*/docs/tex/**/*.tps
-*/docs/tex/**/*.ver
+docs/**/*.aux
+docs/**/*.bbl
+docs/**/*.bcf
+docs/**/*.blg
+docs/**/*.dvi
+docs/**/*.gz
+docs/**/*.hst
+docs/**/*.lof
+docs/**/*.log
+docs/**/*.lot
+docs/**/*.out
+docs/**/*.pdf
+docs/**/*.run.xml
+docs/**/*.toc
+docs/**/*.tcp
+docs/**/*.tps
+docs/**/*.ver
 
 # beamer files
-*/docs/tex/**/*.nav
-*/docs/tex/**/*.snm
-*/docs/tex/**/*.vrb
+docs/**/*.nav
+docs/**/*.snm
+docs/**/*.vrb
 
 # =========================
 # Folder/Files #
 # =========================
+build/*
 output/*
 temp/*
-build/*

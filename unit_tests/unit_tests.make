@@ -13,6 +13,7 @@ OBJS   = \
        logging.obj \
        matlab.obj \
        operators.obj \
+       parameters.obj \
        prng_nums.obj \
        stats.obj \
        text_input.obj \
@@ -41,7 +42,7 @@ else
 endif
 
 # main executable
-all : run_test_text_inputs_str2num.exe run_test_utils_find_those_alive.exe run_test_utils_histcounts.exe run_test_utils_unit_vec.exe
+all : run_all_tests.exe run_test_text_inputs_str2num.exe run_test_utils_find_those_alive.exe run_test_utils_histcounts.exe run_test_utils_unit_vec.exe
 
 run_all_tests.exe : run_all_tests.f90 $(B)run_all_tests.obj
 	$(FC) $(FCFLAGS) -o run_all_tests.exe run_all_tests.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_text_inputs_str2num.obj $(B)test_utils_find_those_alive.obj $(B)test_utils_histcounts.obj $(B)test_utils_unit_vec.obj $(addprefix $(OBJLOC)/,$(OBJS))
