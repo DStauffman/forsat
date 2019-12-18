@@ -235,9 +235,14 @@ contains
         real(RK), intent(in),   dimension(:) :: vec
         real(RK), dimension(:), allocatable  :: output
         ! local variables
-        real(RK) :: mag
+        real(RK) :: mag, mag_sqrd
         ! calculations
-        mag    = sum(vec**2, dim=1)
+        mag_sqrd = sum(vec**2, dim=1)
+        if (mag_sqrd > 0) then
+            mag = sqrt(mag_sqrd)
+        else
+            mag = ONE
+        end if
         output = vec / mag
     end function unit_vec_1d
 
@@ -248,7 +253,7 @@ contains
         real(RK), dimension(:,:), allocatable :: output
         ! local variables
         integer :: axis, num
-        real(RK), dimension(:),   allocatable :: mag
+        real(RK), dimension(:),   allocatable :: mag, mag_sqrd
         real(RK), dimension(:,:), allocatable :: full_mag
         if (present(dim)) then
             axis = dim
@@ -257,11 +262,22 @@ contains
         end if
         select case (axis)
             case (1)
-                mag      = sum(vec**2, dim=1)
+                mag_sqrd = sum(vec**2, dim=1)
+                print *, mag_sqrd
+                where (mag_sqrd > 0)
+                    mag = sqrt(mag_sqrd)
+                elsewhere
+                    mag = ONE
+                end where
                 num      = size(vec, 2)
                 full_mag = spread(mag, dim=2, ncopies=num)
             case (2)
-                mag      = sum(vec**2, dim=2)
+                mag_sqrd = sum(vec**2, dim=2)
+                where (mag_sqrd > 0)
+                    mag = sqrt(mag_sqrd)
+                elsewhere
+                    mag = ONE
+                end where
                 num      = size(vec, 1)
                 full_mag = spread(mag, dim=1, ncopies=num)
             case default

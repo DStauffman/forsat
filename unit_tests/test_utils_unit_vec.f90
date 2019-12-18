@@ -8,10 +8,11 @@ module test_utils_unit_vec
     implicit none
     
     ! constants
-    real(RK), parameter HR2 = sqrt(TWO) / TWO
+    real(RK), parameter :: HR2 = sqrt(TWO) / TWO
 
     ! Global variables for use in all tests
-    real(RK), dimension(:), allocatable :: data, norm_data, exp_data
+    real(RK), dimension(:),    allocatable :: norm_1d
+    real(RK), dimension(:, :), allocatable :: data, exp_data, norm_2d
 
 contains
 
@@ -21,8 +22,8 @@ contains
     end subroutine setup
 
     subroutine test_nominal
-        norm_data = unit_vec(data, dim=1)
-        call assert_equals(exp_data, norm_data, size(exp_data))
+        norm_2d = unit_vec(data, dim=1)
+        call assert_equals(exp_data, norm_2d, size(exp_data,1), size(exp_data,2))
     end subroutine
 
     subroutine test_bad_axis
@@ -33,16 +34,16 @@ contains
     subroutine test_single_vector
     integer :: i
         do i=1, 3
-            norm_data = unit_vec(data(:, i))
-            call assert_equals(exp_data(:, i), norm_data(:,i), size(exp_data(:, i)))
+            norm_1d = unit_vec(data(:, i))
+            call assert_equals(exp_data(:, i), norm_1d, size(exp_data(:, i)))
         end do
     end subroutine
 
     subroutine test_single_vector_axis1
         integer :: i
         do i=1, 3
-            norm_data = unit_vec(data(:, i), dim=1)
-            call assert_equals(exp_data(:, i), norm_data(:,i), size(exp_data(:, i)))
+            norm_2d = unit_vec(spread(data(:,i), dim=2, ncopies=1), dim=1)
+            call assert_equals(exp_data(:,i), pack(norm_2d, mask=.true.), size(exp_data(:,i)))
         end do
     end subroutine
 

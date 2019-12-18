@@ -41,17 +41,25 @@ module constants
     integer, public, parameter :: NEG_LARGE_INT   = -1073741824 ! -2**30
 
     ! Constants - reals
-    real(RK), public, parameter :: PI              = 4._RK * atan(1._RK)
-    real(RK), public, parameter :: TWO_PI          = 2._RK * pi
-    real(RK), public, parameter :: NAN             = transfer(-2251799813685248_LONG_INT, 1._RK)
+    ! basic values
     real(RK), public, parameter :: ZERO            = 0._RK
     real(RK), public, parameter :: ONE             = 1._RK
     real(RK), public, parameter :: TWO             = 2._RK
     real(RK), public, parameter :: LARGE           = huge(0._RK)
     real(RK), public, parameter :: NEG_LARGE       = -huge(0._RK)
     real(RK), public, parameter :: SMALL           = tiny(0._RK)
-    
-    ! Constants - conversions
-    real(RK), public, parameter :: MONTHS_PER_YEAR = 12._RK
+    real(RK), public, parameter :: NAN             = transfer(-2251799813685248_LONG_INT, 1._RK)
+
+    ! trig
+    real(RK), public, parameter :: PI                = 4._RK * atan(1._RK)
+    real(RK), public, parameter :: TWO_PI            = 2._RK * PI
+    real(RK), public, parameter :: PI_OVER_TWO       = PI / 2._RK
+    real(RK), public, parameter :: PI_OVER_THREE     = PI / 3._RK
+    real(RK), public, parameter :: PI_OVER_FOUR      = PI / 4._RK
+    real(RK), public, parameter :: PI_OVER_SIX       = PI / 6._RK
+    real(RK), public, parameter :: TWO_PI_OVER_THREE = TWO_PI / 3._RK
+
+    ! misc
+    real(RK), public, parameter :: MONTHS_PER_YEAR   = 12._RK
 
 end module
