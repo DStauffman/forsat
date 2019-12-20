@@ -42,13 +42,17 @@ else
 endif
 
 # main executable
-all : run_all_tests.exe run_test_text_inputs_str2num.exe run_test_utils_find_those_alive.exe run_test_utils_histcounts.exe run_test_utils_unit_vec.exe
+all : run_all_tests.exe run_test_stats_prob_to_rate.exe run_test_text_input_str2num.exe run_test_utils_find_those_alive.exe run_test_utils_histcounts.exe run_test_utils_unit_vec.exe
 
 run_all_tests.exe : run_all_tests.f90 $(B)run_all_tests.obj
-	$(FC) $(FCFLAGS) -o run_all_tests.exe run_all_tests.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_text_inputs_str2num.obj $(B)test_utils_find_those_alive.obj $(B)test_utils_histcounts.obj $(B)test_utils_unit_vec.obj $(addprefix $(OBJLOC)/,$(OBJS))
+	$(FC) $(FCFLAGS) -o run_all_tests.exe run_all_tests.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_stats_prob_to_rate.obj $(B)test_text_input_str2num.obj $(B)test_utils_find_those_alive.obj \
+        $(B)test_utils_histcounts.obj $(B)test_utils_unit_vec.obj $(addprefix $(OBJLOC)/,$(OBJS))
 
-run_test_text_inputs_str2num.exe : run_test_text_inputs_str2num.f90 $(B)run_test_text_inputs_str2num.obj
-	$(FC) $(FCFLAGS) -o run_test_text_inputs_str2num.exe run_test_text_inputs_str2num.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_text_inputs_str2num.obj $(addprefix $(OBJLOC)/,$(OBJS))
+run_test_stats_prob_to_rate.exe : run_test_stats_prob_to_rate.f90 $(B)run_test_stats_prob_to_rate.obj
+	$(FC) $(FCFLAGS) -o run_test_stats_prob_to_rate.exe run_test_stats_prob_to_rate.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_stats_prob_to_rate.obj $(addprefix $(OBJLOC)/,$(OBJS))
+
+run_test_text_input_str2num.exe : run_test_text_input_str2num.f90 $(B)run_test_text_input_str2num.obj
+	$(FC) $(FCFLAGS) -o run_test_text_input_str2num.exe run_test_text_input_str2num.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_text_input_str2num.obj $(addprefix $(OBJLOC)/,$(OBJS))
 
 run_test_utils_find_those_alive.exe : run_test_utils_find_those_alive.f90 $(B)run_test_utils_find_those_alive.obj
 	$(FC) $(FCFLAGS) -o run_test_utils_find_those_alive.exe run_test_utils_find_those_alive.f90 -I$(OBJDIR) -I$(OBJLOC) $(B)fruit.obj $(B)test_utils_find_those_alive.obj $(addprefix $(OBJLOC)/,$(OBJS))
@@ -66,9 +70,11 @@ $(B)%.obj : %.f90
 # object file dependencies
 $(B)fruit.obj : fruit.f90
 
-$(B)run_all_tests.obj : run_all_tests.f90 $(B)fruit.obj $(B)test_text_inputs_str2num.obj $(B)test_utils_find_those_alive.obj $(B)test_utils_histcounts.obj $(B)test_utils_unit_vec.obj
+$(B)run_all_tests.obj : run_all_tests.f90 $(B)fruit.obj $(B)test_stats_prob_to_rate.obj $(B)test_text_input_str2num.obj $(B)test_utils_find_those_alive.obj $(B)test_utils_histcounts.obj $(B)test_utils_unit_vec.obj
 
-$(B)run_test_text_inputs_str2num.obj : run_test_text_inputs_str2num.f90 $(B)fruit.obj $(B)test_text_inputs_str2num.obj
+$(B)run_test_stats_prob_to_rate.obj : run_test_stats_prob_to_rate.f90 $(B)fruit.obj $(B)test_stats_prob_to_rate.obj
+
+$(B)run_test_text_input_str2num.obj : run_test_text_input_str2num.f90 $(B)fruit.obj $(B)test_text_input_str2num.obj
 
 $(B)run_test_utils_find_those_alive.obj : run_test_utils_find_those_alive.f90 $(B)fruit.obj $(B)test_utils_find_those_alive.obj
 
@@ -76,13 +82,15 @@ $(B)run_test_utils_histcounts.obj : run_test_utils_histcounts.f90 $(B)fruit.obj 
 
 $(B)run_test_utils_unit_vec.obj : run_test_utils_unit_vec.f90 $(B)fruit.obj $(B)test_utils_unit_vec.obj
 
-$(B)test_text_inputs_str2num.obj : test_text_inputs_str2num.f90 $(B)fruit.obj
+$(B)test_stats_prob_to_rate.obj : test_stats_prob_to_rate.f90 $(B)fruit.obj $(OBJLOC)/constants.obj $(OBJLOC)/stats.obj
 
-$(B)test_utils_find_those_alive.obj : test_utils_find_those_alive.f90 $(B)fruit.obj
+$(B)test_text_input_str2num.obj : test_text_input_str2num.f90 $(B)fruit.obj $(OBJLOC)/constants.obj $(OBJLOC)/text_input.obj
 
-$(B)test_utils_histcounts.obj : test_utils_histcounts.f90 $(B)fruit.obj
+$(B)test_utils_find_those_alive.obj : test_utils_find_those_alive.f90 $(B)fruit.obj $(OBJLOC)/constants.obj $(OBJLOC)/utils.obj
 
-$(B)test_utils_unit_vec.obj : test_utils_unit_vec.f90 $(B)fruit.obj
+$(B)test_utils_histcounts.obj : test_utils_histcounts.f90 $(B)fruit.obj $(OBJLOC)/constants.obj $(OBJLOC)/utils.obj
+
+$(B)test_utils_unit_vec.obj : test_utils_unit_vec.f90 $(B)fruit.obj $(OBJLOC)/constants.obj $(OBJLOC)/utils.obj
 
 # clean-up
 clean :
