@@ -90,3 +90,4 @@ $(B)utils.obj : $(S)utils.f90 $(B)asserts.obj $(B)constants.obj $(B)matlab.obj $
 clean :
 	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod forsat*.exe
 	$(TEST) -d $(OBJDIR) && $(RM) -r $(OBJDIR)
+

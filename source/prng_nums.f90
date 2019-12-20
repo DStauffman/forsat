@@ -177,8 +177,8 @@ contains
             extra_value                  = z2(half_generate)
             saved_extra                  = .true.
         else
-            error stop 'Wrong number of values generated, needed: "' // int2str(num_needed) // '", have "' // int2str(num_have) // &
-                '".'
+            error stop 'Wrong number of values generated, needed: "' // int2str(num_needed) // '", have "' // &
+                int2str(num_have) // '".'
         end if
     end subroutine prng_randn
 
