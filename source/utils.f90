@@ -252,38 +252,35 @@ contains
         integer,  intent(in), optional        :: dim
         real(RK), dimension(:,:), allocatable :: output
         ! local variables
-        integer :: axis, num
+        integer :: axis, i, num
         real(RK), dimension(:),   allocatable :: mag, mag_sqrd
-        real(RK), dimension(:,:), allocatable :: full_mag
         if (present(dim)) then
             axis = dim
         else
             axis = 1
         end if
-        select case (axis)
-            case (1)
-                mag_sqrd = sum(vec**2, dim=1)
-                print *, mag_sqrd
-                where (mag_sqrd > 0)
-                    mag = sqrt(mag_sqrd)
-                elsewhere
-                    mag = ONE
-                end where
-                num      = size(vec, 2)
-                full_mag = spread(mag, dim=2, ncopies=num)
-            case (2)
-                mag_sqrd = sum(vec**2, dim=2)
-                where (mag_sqrd > 0)
-                    mag = sqrt(mag_sqrd)
-                elsewhere
-                    mag = ONE
-                end where
-                num      = size(vec, 1)
-                full_mag = spread(mag, dim=1, ncopies=num)
-            case default
-                error stop 'Bad dim.'
-        end select
-        output = vec / full_mag
+        if ( (axis /= 1) .and. (axis /= 2) ) then
+            error stop 'Bad dim of ' // int2str(axis)
+        end if
+        mag_sqrd = sum(vec**2, dim=axis)
+        num = size(mag_sqrd)
+        allocate(mag, mold=mag_sqrd)
+        where (mag_sqrd > 0)
+            mag = sqrt(mag_sqrd)
+        elsewhere
+            mag = ONE
+        end where
+        ! TODO: would prefer to use spread function to avoid all this unnecessary code
+        allocate(output, mold=vec)
+        if (axis == 1) then
+            do i=1, num
+                output(:,i) = vec(:,i) / mag(i)
+            end do
+        else
+            do i=1, num
+                output(i,:) = vec(i,:) / mag(i)
+            end do
+        end if
     end function unit_vec_2d
 
     function load_seeds(filename) result(seeds)

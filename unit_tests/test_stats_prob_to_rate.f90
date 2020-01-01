@@ -6,7 +6,7 @@ module test_stats_prob_to_rate
     use stats,     only: prob_to_rate, rate_to_prob
 
     implicit none
-    
+
     ! constants
     real(RK), parameter :: TOLERANCE = 1e-10_RK
 
