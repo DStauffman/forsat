@@ -60,7 +60,8 @@ $(B)constants.obj : $(S)constants.f90
 
 $(B)enums.obj : $(S)enums.f90
 
-$(B)forsat.obj : $(S)forsat.f90 $(B)constants.obj $(B)utils.obj
+#$(B)forsat.obj : $(S)forsat.f90 $(B)constants.obj $(B)utils.obj
+$(B)forsat.obj : $(S)forsat.f90 $(addprefix $(B),$(OBJS))
 
 $(B)logging.obj : $(S)logging.f90 $(B)constants.obj
 

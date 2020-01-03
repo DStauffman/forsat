@@ -12,27 +12,39 @@ module quaternions
         real(RK) :: z
         real(RK) :: s
     contains
-        generic   :: operator(+) => quat_add
-        generic   :: operator(-) => quat_sub
-        generic   :: operator(*) => quat_mult, quat_mult_real, real_quat_mult, quat_mult_vec, vec_mult_quat
-        generic   :: operator(/) => quat_div
-        procedure :: mag  => quat_mag
-        procedure :: norm => quat_norm
+        procedure :: mag      => quat_mag
+        procedure :: norm     => quat_norm
     end type quat_t
+    interface operator (+)
+        module procedure quat_add
+    end interface
+    interface operator (-)
+        module procedure quat_sub
+    end interface
+    interface operator (*)
+        module procedure quat_mult
+        module procedure quat_mult_real
+        module procedure real_quat_mult
+        !module procedure quat_mult_vec
+        !module procedure vec_mult_quat
+    end interface
+    interface operator (/)
+        module procedure quat_div
+    end interface
     interface quat_t
         module procedure :: quat_init_xyzs
-        module procedure :: quat_init_quat
+        module procedure :: quat_init_vec
     end interface quat_t
 
 contains
     !! Initializtaions
-    function quat_init_xyzs(x, y, z, s) result(q_out)
+    pure function quat_init_xyzs(x, y, z, s) result(q_out)
         ! inputs and outputs
-        real(RK), optional :: x
-        real(RK), optional :: y
-        real(RK), optional :: z
-        real(RK), optional :: s
-        type(quat_t)       :: q_out
+        real(RK), intent(in), optional :: x
+        real(RK), intent(in), optional :: y
+        real(RK), intent(in), optional :: z
+        real(RK), intent(in), optional :: s
+        type(quat_t)                   :: q_out
         ! local variables
         logical, dimension(4) :: components
         ! initialize variables
@@ -51,10 +63,10 @@ contains
             error stop 'You must initialize all four components if you initialize any of them.'
         end if
     end function quat_init_xyzs
-    function quat_init_vec(vec) result(q_out)
+    pure function quat_init_vec(vec) result(q_out)
         ! inputs and outputs
-        real(RK), dimension(4) :: vec
-        type(quat_t)           :: q_out
+        real(RK), dimension(4), intent(in) :: vec
+        type(quat_t)                       :: q_out
         ! local variables
         integer :: start_ix
         ! get first index
@@ -64,14 +76,14 @@ contains
         q_out%y = vec(start_ix + 1)
         q_out%z = vec(start_ix + 2)
         q_out%s = vec(start_ix + 3)
-    end function quat_out_init_vec
+    end function quat_init_vec
     
     !! Addition
     pure elemental function quat_add(q1, q2) result(q_out)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        type(quat_t), intent(in) :: q2
-        type(quat_t)             :: q_out
+        class(quat_t), intent(in) :: q1
+        class(quat_t), intent(in) :: q2
+        type(quat_t)              :: q_out
         ! initialize output
         q_out = quat_t()
         ! sum the components
@@ -84,9 +96,9 @@ contains
     !! Subtraction
     pure elemental function quat_sub(q1, q2) result(q_out)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        type(quat_t), intent(in) :: q2
-        type(quat_t)             :: q_out
+        class(quat_t), intent(in) :: q1
+        class(quat_t), intent(in) :: q2
+        type(quat_t)              :: q_out
         ! initialize output
         q_out = quat_t()
         ! subtract the components
@@ -99,9 +111,9 @@ contains
     !! Multiplication
     pure elemental function quat_mult(q1, q2) result(q_out)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        type(quat_t), intent(in) :: q2
-        type(quat_t)             :: q_out
+        class(quat_t), intent(in) :: q1
+        class(quat_t), intent(in) :: q2
+        type(quat_t)              :: q_out
         ! initialize the output
         q_out = quat_t()
         ! multiple the quaternions
@@ -119,9 +131,9 @@ contains
     end function quat_mult
     pure elemental function quat_mult_real(q1, r2) result(q_out)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        real(RK),     intent(in) :: r2
-        type(quat_t)             :: q_out
+        class(quat_t), intent(in) :: q1
+        real(RK),      intent(in) :: r2
+        type(quat_t)              :: q_out
         ! initialize the output
         q_out = quat_t()
         ! multiply the components
@@ -132,9 +144,9 @@ contains
     end function quat_mult_real
     pure elemental function real_quat_mult(r1, q2) result(q_out)
         ! inputs and outputs
-        real(RK),     intent(in) :: r1
-        type(quat_t), intent(in) :: q2
-        type(quat_t) :: q_out
+        real(RK),      intent(in) :: r1
+        class(quat_t), intent(in) :: q2
+        type(quat_t)              :: q_out
         ! initialize the output
         q_out = quat_t()
         ! multiply the components
@@ -147,9 +159,9 @@ contains
     !! Division
     pure elemental function quat_div(q1, q2) result(q_out)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        type(quat_t), intent(in) :: q2
-        type(quat_t)             :: q_out
+        class(quat_t), intent(in) :: q1
+        class(quat_t), intent(in) :: q2
+        type(quat_t)              :: q_out
         ! define quaternion division as the inverse of multiplication
         q_out = quat_mult(q2,q1)
     end function quat_div
@@ -157,16 +169,16 @@ contains
     !! Magnitude
     pure elemental function quat_mag(q1) result(output)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        real(RK)                 :: output
-        q_out = q1%x**2 + q1%y**2 + q1%z**2 + q1%s**2
+        class(quat_t), intent(in) :: q1
+        real(RK)                  :: output
+        output = q1%x**2 + q1%y**2 + q1%z**2 + q1%s**2
     end function quat_mag
 
     !! Norm
     pure elemental function quat_norm(q1) result(q_out)
         ! inputs and outputs
-        type(quat_t), intent(in) :: q1
-        type(quat_t)             :: q_out
+        class(quat_t), intent(in) :: q1
+        type(quat_t)              :: q_out
         ! local variables
         real(RK) :: mag
         ! calculate the magnitude

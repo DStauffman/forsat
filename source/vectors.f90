@@ -11,15 +11,33 @@ module vector_3d
         real(RK) :: y
         real(RK) :: z
     contains
-        generic   :: operator(+) => vector_add, vector_add_real, real_add_vector
-        generic   :: operator(-) => vector_subtract, vector_subtract_real, real_subtract_vector
-        generic   :: operator(*) => vector_multiply, vector_mult_real, real_mult_vector
-        generic   :: operator(/) => vector_divide, vector_div_real, real_div_vector
-        generic   :: operator(.dot.)   => dot_product_fn
-        generic   :: operator(.cross.) => cross_product
         procedure :: mag  => vector_mag
         procedure :: norm => vector_norm
     end type vec3_t
+    interface operator (+)
+        module procedure vector_add
+        module procedure vector_add_real
+        module procedure real_add_vector
+    end interface
+    interface operator (-)
+        module procedure vector_subtract
+        module procedure vector_subtract_real
+        module procedure real_subtract_vector
+    end interface
+    interface operator (*)
+        module procedure vector_times_real
+        module procedure real_times_vector
+    end interface
+    interface operator (/)
+        module procedure vector_divide_real
+        module procedure real_divide_vector
+    end interface
+    interface operator (.dot.)
+        module procedure :: vector_dot
+    end interface
+    interface operator (.cross.)
+        module procedure :: vector_cross
+    end interface
     interface vec3_t
         module procedure :: vector_init_xyz
         module procedure :: vector_init_vec
@@ -27,12 +45,12 @@ module vector_3d
 
 contains
     !! Initializations
-    function vector_init_xyz(x, y, z) result(vec_out)
+    pure function vector_init_xyz(x, y, z) result(vec_out)
         ! inputs and outputs
-        real(RK), optional :: x
-        real(RK), optional :: y
-        real(RK), optional :: z
-        type(vec3_t)       :: vec_out
+        real(RK), intent(in), optional :: x
+        real(RK), intent(in), optional :: y
+        real(RK), intent(in), optional :: z
+        type(vec3_t)                   :: vec_out
         ! local variables
         logical, dimension(3) :: components
         ! initialize variables
@@ -49,10 +67,10 @@ contains
             error stop 'You must initialize all three components if you initialize any of them.'
         end if
     end function vector_init_xyz
-    function vector_init_vec(vec) result(vec_out)
+    pure function vector_init_vec(vec) result(vec_out)
         ! inputs and outputs
-        real(RK), dimension(3) :: vec
-        type(vec3_t)           :: vec_out
+        real(RK), dimension(3), intent(in) :: vec
+        type(vec3_t)                       :: vec_out
         ! local variables
         integer :: start_ix
         ! get first index
@@ -99,7 +117,7 @@ contains
         vec_out%x = r1 + v2%x
         vec_out%y = r1 + v2%y
         vec_out%z = r1 + v2%z
-    end function vector_add_real
+    end function real_add_vector
 
     !! Subtraction
     pure elemental function vector_subtract(v1, v2) result(vec_out)
@@ -136,7 +154,7 @@ contains
         vec_out%x = r1 - v2%x
         vec_out%y = r1 - v2%y
         vec_out%z = r1 - v2%z
-    end function vector_subtract_real
+    end function real_subtract_vector
 
     !! Multiplication
     pure elemental function vector_times_real(v1, r2) result(vec_out)
@@ -154,33 +172,33 @@ contains
     pure elemental function real_times_vector(r1, v2) result(vec_out)
         ! inputs and outputs
         real(RK),     intent(in) :: r1
-        type(vect_t), intent(in) :: v2
-        type(vect_t) :: vec_out
+        type(vec3_t), intent(in) :: v2
+        type(vec3_t) :: vec_out
         ! initialize output
         vec_out = vec3_t()
         ! multiply the components
-        real_times_vect%x = r1 * v2%x
-        real_times_vect%y = r1 * v2%y
-        real_times_vect%z = r1 * v2%z
+        vec_out%x = r1 * v2%x
+        vec_out%y = r1 * v2%y
+        vec_out%z = r1 * v2%z
     end function real_times_vector
 
     !! Division
-    function vector_divide_real(v1, r2) result(vec_out)
+    pure function vector_divide_real(v1, r2) result(vec_out)
         ! inputs and outputs
-        type(vect_t), intent(in) :: v1
+        type(vec3_t), intent(in) :: v1
         real(RK),     intent(in) :: r2
-        type(vect_t)             :: vec_out
+        type(vec3_t)             :: vec_out
         ! initialize output
         vec_out = vec3_t()
         ! divide the components
         vec_out%x = v1%x / r2
         vec_out%y = v1%y / r2
         vec_out%z = v1%z / r2
-    end function vect_divide_real
-    function real_divide_vector(r1, v2) result(vec_out)
+    end function vector_divide_real
+    pure function real_divide_vector(r1, v2) result(vec_out)
         real(RK),     intent(in) :: r1
-        type(vect_t), intent(in) :: v2
-        type(vect_t)             :: vec_out
+        type(vec3_t), intent(in) :: v2
+        type(vec3_t)             :: vec_out
         ! initialize output
         vec_out = vec3_t()
         ! divide the components
@@ -216,8 +234,8 @@ contains
     !! Magnitude
     pure elemental function vector_mag(vec) result(output)
         ! inputs and outputs
-        type(vec3_t), intent(in) :: vec
-        real(RK)                 :: output
+        class(vec3_t), intent(in) :: vec
+        real(RK)                  :: output
         ! calculations
         output = sqrt(vec%x**2 + vec%y**2 + vec%z**2)
     end function vector_mag
@@ -225,10 +243,10 @@ contains
     !! Norm
     pure elemental function vector_norm(vec) result(vec_out)
         ! inputs and outputs
-        type(vec3_t), intent(in) :: vec
-        type(vec3_t)             :: vec_out
+        class(vec3_t), intent(in) :: vec
+        type(vec3_t)              :: vec_out
         ! calculations
         vec_out = vec / vector_mag(vec)
-    end function vector_mag
+    end function vector_norm
 
 end module vector_3d
