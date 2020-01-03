@@ -9,6 +9,7 @@ module test_utils_unit_vec
     
     ! constants
     real(RK), parameter :: HR2 = sqrt(TWO) / TWO
+    real(RK), parameter :: tolerance = 1e-14_RK
 
     ! Global variables for use in all tests
     real(RK), dimension(:),    allocatable :: norm_1d
@@ -23,7 +24,7 @@ contains
 
     subroutine test_nominal
         norm_2d = unit_vec(data, dim=1)
-        call assert_equals(exp_data, norm_2d, size(exp_data,1), size(exp_data,2))
+        call assert_equals(exp_data, norm_2d, size(exp_data,1), size(exp_data,2), tolerance)
     end subroutine
 
     subroutine test_bad_axis
@@ -35,7 +36,7 @@ contains
     integer :: i
         do i=1, 3
             norm_1d = unit_vec(data(:, i))
-            call assert_equals(exp_data(:, i), norm_1d, size(exp_data(:, i)))
+            call assert_equals(exp_data(:, i), norm_1d, size(exp_data(:, i)), tolerance)
         end do
     end subroutine
 
@@ -43,7 +44,7 @@ contains
         integer :: i
         do i=1, 3
             norm_2d = unit_vec(spread(data(:,i), dim=2, ncopies=1), dim=1)
-            call assert_equals(exp_data(:,i), pack(norm_2d, mask=.true.), size(exp_data(:,i)))
+            call assert_equals(exp_data(:,i), pack(norm_2d, mask=.true.), size(exp_data(:,i)), tolerance)
         end do
     end subroutine
 

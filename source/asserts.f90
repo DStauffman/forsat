@@ -9,7 +9,7 @@
 !----------------------------------------------------------------------
 module asserts
 
-    use :: text_output, only: int2str
+    use text_output, only: int2str
 
     implicit none
 
