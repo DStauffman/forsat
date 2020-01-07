@@ -15,10 +15,12 @@ OBJS   = \
        operators.obj \
        parameters.obj \
        prng_nums.obj \
+       quaternions.obj \
        stats.obj \
        text_input.obj \
        text_output.obj \
        utils.obj \
+       vectors.obj \
 
 # no implicit rules
 .SUFFIXES:
@@ -70,7 +72,8 @@ $(B)%.obj : %.f90
 # object file dependencies
 $(B)fruit.obj : fruit.f90
 
-$(B)run_all_tests.obj : run_all_tests.f90 $(B)fruit.obj $(B)test_stats_prob_to_rate.obj $(B)test_text_input_str2num.obj $(B)test_utils_find_those_alive.obj $(B)test_utils_histcounts.obj $(B)test_utils_unit_vec.obj
+$(B)run_all_tests.obj : run_all_tests.f90 $(B)fruit.obj $(B)test_stats_prob_to_rate.obj $(B)test_text_input_str2num.obj $(B)test_utils_find_those_alive.obj $(B)test_utils_histcounts.obj \
+        $(B)test_utils_unit_vec.obj
 
 $(B)run_test_stats_prob_to_rate.obj : run_test_stats_prob_to_rate.f90 $(B)fruit.obj $(B)test_stats_prob_to_rate.obj
 
@@ -94,6 +97,6 @@ $(B)test_utils_unit_vec.obj : test_utils_unit_vec.f90 $(B)fruit.obj $(OBJLOC)/co
 
 # clean-up
 clean :
-	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod run_test_*.exe
+	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod run_*.exe
 
 .PHONY : clean all
