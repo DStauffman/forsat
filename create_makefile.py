@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Script to autogenerate the makefile.
 
 Notes
 -----
 #.  Written by David C. Stauffer in January 2020.
-
 """
 
 #%% Imports

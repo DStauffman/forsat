@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Script to autogenerate the unit test programs.
 
 Notes
 -----
 #.  Written by David C. Stauffer in December 2019.
-
 """
 
 #%% Imports
