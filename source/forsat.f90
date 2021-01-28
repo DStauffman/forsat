@@ -1,25 +1,35 @@
 program forsat
 
-use constants, only: RK, ONE, ZERO
+use constants, only: RK
 
-use utils, only: unit_vec
+use prng_nums, only: get_rand, get_randn, get_randg, get_randb, prng_t
 
 implicit none
 
 ! variables
-integer :: i
-real(RK), dimension(:), allocatable :: x, x_norm
-!real(RK), dimension(:,:), allocatable :: x, x_norm
+integer :: n
+real(RK) :: a, b
+real(RK), dimension(:), allocatable :: x_u, x_n, x_g1, x_g2, x_b
+type(prng_t) :: prng
 
-!x = [(real(i, RK), i=1, 3)]
-x = [-ONE, ZERO, ONE]
-! TODO: this case isn't working:
-!x = reshape([-ONE, ZERO, ONE], [3, 1])
+n = 10
 
-print *, x
+a = 2
+b = 5
+allocate(x_u(n))
+allocate(x_n(n))
+allocate(x_g1(n))
+allocate(x_g2(n))
 
-x_norm = unit_vec(x)
+prng = prng_t()
 
-print *, x_norm
+x_u  = get_rand(n, prng)
+x_n  = get_randn(n, prng)
+x_g1 = get_randg(n, a, prng)
+x_g2 = get_randg(n, b, prng)
+x_b  = get_randb(n, a, b, prng)
+
+
+print *, x_b
 
 end program forsat

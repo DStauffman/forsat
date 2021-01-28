@@ -38,12 +38,17 @@ contains
         logical, intent(in), dimension(:)  :: ix_logic
         integer, dimension(:), allocatable :: ix_int
         ! local variables
-        integer :: i
+        integer :: i, c
         integer, dimension(1:size(ix_logic)) :: temp
-        ! build temporary array to all indices
-        temp = [(i, i=lbound(ix_logic, dim=1), ubound(ix_logic, dim=1))]
-        ! pack to where you need it based on the mask
-        ix_int = pack(temp, mask=ix_logic)
+        ! find the indices where the ix_logic is true
+        c = 0
+        do i = lbound(ix_logic, dim=1), ubound(ix_logic, dim=1)
+            if (ix_logic(i)) then
+                c = c + 1
+                temp(c) = i
+            end if
+        end do
+        ix_int = temp(1:c)
     end function find
 
     !! cumsum

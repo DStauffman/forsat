@@ -11,7 +11,7 @@ module prng_nums
 
     private
 
-    public :: get_rand, get_randn
+    public :: get_rand, get_randn, get_randg, get_randb
 
     type, public :: prng_t
         integer :: n
@@ -22,9 +22,17 @@ module prng_nums
         generic   :: rand         => rand_vec, rand_sca
         generic   :: uniform      => rand_vec, rand_sca
         procedure :: set_seed     => prng_set_seed
-        procedure :: randn        => prng_randn, prng_randn_single
+        procedure :: randn_vec    => prng_randn_vector
+        procedure :: randn_sca    => prng_randn_scalar
+        generic   :: randn        => randn_vec, randn_sca
+        generic   :: normal       => randn_vec, randn_sca
         procedure :: normal_bound => bounded_normal_draw
-        procedure :: normal       => prng_normal
+        procedure :: randg_vec    => prng_randg_vector
+        procedure :: randg_sca    => prng_randg_scalar
+        generic   :: gamma        => randg_vec, randg_sca
+        procedure :: randb_vec    => prng_randb_vector
+        procedure :: randb_sca    => prng_randb_scalar
+        generic   :: beta         => randb_vec, randb_sca
     end type prng_t
     interface prng_t
         module procedure prng_init
@@ -50,6 +58,17 @@ contains
         this%seeds(:) = seeds
     end subroutine prng_set_seed
 
+    subroutine prng_rand_scalar(this, output)
+        class(prng_t), intent(inout) :: this
+        real(RK),      intent(inout) :: output
+        ! Don't let parallel tasks run this part at the same time!
+        !$omp critical
+        call random_seed(put=this%seeds)
+        call random_number(output)
+        call random_seed(get=this%seeds)
+        !$omp end critical
+    end subroutine prng_rand_scalar
+
     subroutine prng_rand_vector(this, output)
         class(prng_t), intent(inout)          :: this
         real(RK), intent(inout), dimension(:) :: output
@@ -65,18 +84,7 @@ contains
         !$omp end critical
     end subroutine prng_rand_vector
 
-    subroutine prng_rand_scalar(this, output)
-        class(prng_t), intent(inout) :: this
-        real(RK),      intent(inout) :: output
-        ! Don't let parallel tasks run this part at the same time!
-        !$omp critical
-        call random_seed(put=this%seeds)
-        call random_number(output)
-        call random_seed(get=this%seeds)
-        !$omp end critical
-    end subroutine prng_rand_scalar
-
-    subroutine prng_randn_single(this, output)
+    subroutine prng_randn_scalar(this, output)
         ! inputs and outputs
         class(prng_t), intent(inout) :: this
         real(RK),      intent(inout) :: output
@@ -104,9 +112,9 @@ contains
 
         output = z1
         return
-    end subroutine prng_randn_single
+    end subroutine prng_randn_scalar
 
-    subroutine prng_randn(this, output)
+    subroutine prng_randn_vector(this, output)
         ! inputs and outputs
         class(prng_t), intent(inout)          :: this
         real(RK), intent(inout), dimension(:) :: output
@@ -180,7 +188,142 @@ contains
             error stop 'Wrong number of values generated, needed: "' // int2str(num_needed) // '", have "' // &
                 int2str(num_have) // '".'
         end if
-    end subroutine prng_randn
+    end subroutine prng_randn_vector
+
+    subroutine prng_randg_scalar(this, output, shape_)
+        ! inputs and outputs
+        class(prng_t), intent(inout) :: this
+        real(RK),      intent(inout) :: output
+        real(RK),      intent(in)    :: shape_
+        ! local variables
+        real(RK) :: b, c, temp_rand, u, v, x, y
+        ! calculations
+        if (shape_ == ONE) then
+            call prng_rand_scalar(this, temp_rand)
+            output = -log(ONE - temp_rand)
+        elseif (shape_ == ZERO) then
+            output = ZERO
+        elseif (shape_ < ONE) then
+            do while (.true.)
+                call prng_rand_scalar(this, u)
+                call prng_rand_scalar(this, temp_rand)
+                v = -log(ONE - temp_rand)
+                if (u <= ONE - shape_) then
+                    x = u**(ONE/shape_)
+                    if (x <= v) then
+                        output = x
+                        return
+                    end if
+                else
+                    y = -log((ONE - u) / shape_)
+                    x = (ONE - shape_ + shape_*y) ** (ONE/shape_)
+                    if (x <= (v + y)) then
+                        output = x
+                        return
+                    end if
+                end if
+            end do
+        else
+            b = shape_ - ONE/3._RK
+            c = ONE / sqrt(9._RK * b)
+            do while (.true.)
+                call prng_randn_scalar(this, x)  ! do ----
+                v = ONE + c * x
+                do while (v <= ZERO)  ! while
+                    call prng_randn_scalar(this, x)
+                    v = ONE + c * x
+                end do
+                v = v * v * v
+                call prng_randn_scalar(this, u)
+                if (u < ONE - 0.0331_RK*(x*x)*(x*x)) then
+                    output = b * v
+                    return
+                end if
+                if (log(u) < 0.5_RK*x*x + b*(ONE - v + log(V))) then
+                    output = b * v
+                    return
+                end if
+            end do
+        end if
+    end subroutine prng_randg_scalar
+
+    subroutine prng_randg_vector(this, output, shape_)
+        ! inputs and outputs
+        class(prng_t), intent(inout)          :: this
+        real(RK), intent(inout), dimension(:) :: output
+        real(RK), intent(in)                  :: shape_
+        ! local variables
+        integer                             :: i, num
+        ! get number of draws
+        num = size(output)
+        ! simple test to exit early
+        if (num == 0) then
+            return
+        end if
+        ! TODO: write vectorized version?  For now, call scalar version in loop
+        do i=1, num
+            call prng_randg_scalar(this, output(i), shape_)
+        end do
+    end subroutine prng_randg_vector
+
+    subroutine prng_randb_scalar(this, output, alpha, beta)
+        ! inputs and outputs
+        class(prng_t), intent(inout) :: this
+        real(RK),      intent(inout) :: output
+        real(RK),      intent(in)    :: alpha
+        real(RK),      intent(in)    :: beta
+        ! local variables
+        real(RK) :: g1, g2, p, temp_rand
+        ! generate gamma random values
+        call prng_randg_scalar(this, g1, alpha)
+        call prng_randg_scalar(this, g2, beta)
+        ! check for 0/0 situations, which can happen for a and b both very small
+        if ((g1 == ZERO) .and. (g2 == ZERO)) then
+            p = alpha / (alpha + beta)
+            call prng_rand_scalar(this, temp_rand)
+            if (temp_rand < p) then
+                output = ZERO
+            else
+                output = ONE
+            end if
+        else
+            output = g1 / (g1 + g2)
+        end if
+    end subroutine prng_randb_scalar
+
+    subroutine prng_randb_vector(this, output, alpha, beta)
+        ! inputs and outputs
+        class(prng_t),          intent(inout) :: this
+        real(RK), dimension(:), intent(inout) :: output
+        real(RK),               intent(in)    :: alpha
+        real(RK),               intent(in)    :: beta
+        ! local variables
+        integer                             :: i, num
+        real(RK)                            :: p, temp_rand
+        real(RK), dimension(:), allocatable :: g1, g2
+        ! get number of draws
+        num = size(output)
+        ! allocate intermediate gamma random numbers
+        allocate(g1(num))
+        allocate(g2(num))
+        ! generate gamma random values
+        call prng_randg_vector(this, g1, alpha)
+        call prng_randg_vector(this, g2, beta)
+        ! check for 0/0 situations, which can happen for a and b both very small
+        p = alpha / (alpha + beta)
+        do i=1, num
+            if ((g1(i) == ZERO) .and. (g2(i) == ZERO)) then
+                call prng_rand_scalar(this, temp_rand)
+                if (temp_rand < p) then
+                    g1(i) = ZERO
+                else
+                    g1(i) = ONE
+                end if
+                g2(i) = ONE
+            end if
+        end do
+        output = g1 / (g1 + g2)
+    end subroutine prng_randb_vector
 
     subroutine prng_normal(this, output, mu, sigma)
         ! inputs and outputs
@@ -189,14 +332,17 @@ contains
         real(RK), intent(in)                  :: mu
         real(RK), intent(in)                  :: sigma
         ! local variables
+        integer                             :: num
         real(RK), dimension(:), allocatable :: temp_rand
+        ! number of draws
+        num = size(output)
         ! simple test to exit early
-        if (size(output) == 0) then
+        if (num == 0) then
             return
         end if
         ! call randn and scale by appropriate mean and standard deviation
-        allocate(temp_rand(size(output)))
-        call prng_randn(this, temp_rand)
+        allocate(temp_rand(num))
+        call prng_randn_vector(this, temp_rand)
         output(:) = temp_rand * sigma + mu
     end subroutine prng_normal
 
@@ -269,5 +415,30 @@ contains
         ! get normal random numbers
         call prng%randn(temp_rand)
     end function get_randn
+
+    function get_randg(num, shape_, prng) result(temp_rand)
+        ! inputs and outputs
+        integer,      intent(in)            :: num
+        real(RK),     intent(in)            :: shape_
+        type(prng_t), intent(inout)         :: prng
+        real(RK), dimension(:), allocatable :: temp_rand
+        ! allocate output
+        allocate(temp_rand(num))
+        ! get random numbers
+        call prng%gamma(temp_rand, shape_)
+    end function get_randg
+
+    function get_randb(num, alpha, beta, prng) result(temp_rand)
+        ! inputs and outputs
+        integer,      intent(in)            :: num
+        real(RK),     intent(in)            :: alpha
+        real(RK),     intent(in)            :: beta
+        type(prng_t), intent(inout)         :: prng
+        real(RK), dimension(:), allocatable :: temp_rand
+        ! allocate output
+        allocate(temp_rand(num))
+        ! get beta distribution random numbers
+        call prng%beta(temp_rand, alpha, beta)
+    end function get_randb
 
 end module prng_nums

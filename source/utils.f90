@@ -298,7 +298,7 @@ contains
         ! check if file exists
         inquire(file=filename, exist=file_exists)
         if (.not. file_exists) then
-            write(STDERR, '(A)') ' Warning, seeds file not found, using defaults instead.'
+            write(STDERR, '(A)') ' Warning, seeds file not found at: "' // trim(filename) // '", using defaults instead.'
             seeds = spread([(i, i=1, num_rows)], dim=2, ncopies=num_cols)
             return
         end if
