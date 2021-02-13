@@ -1,7 +1,8 @@
 # compiler and flags
 FC      = gfortran
 FCFLAGS = -O3 -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -cpp
-DBFLAGS = -Og -g -Wall -fimplicit-none -fcheck=all -fbacktrace -Wno-maybe-uninitialized
+DBFLAGS = -Og -g -Wall -fimplicit-none -fcheck=all -fbacktrace -Wno-maybe-uninitialized -fbounds-check
+LAPACK_FLAGS = -L/usr/lib/x86_64-linux-gnu -llapack
 
 # configuration
 SRCDIR = source
@@ -10,6 +11,7 @@ OBJS   = \
        asserts.obj \
        constants.obj \
        enums.obj \
+       kalman.obj \
        logging.obj \
        matlab.obj \
        operators.obj \
@@ -47,11 +49,11 @@ endif
 all : forsat
 
 forsat : $(S)forsat.f90 $(B)forsat.obj
-	$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o forsat.exe $(S)forsat.f90 -I$(OBJDIR) $(addprefix $(B),$(OBJS))
+	$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o forsat.exe $(S)forsat.f90 -I$(OBJDIR) $(addprefix $(B),$(OBJS)) $(LAPACK_FLAGS)
 
 # object file implicit rules
 $(B)%.obj : $(S)%.f90
-	$(FC) -c $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -J$(OBJDIR) -I$(OBJDIR) -o $@ $<
+	$(FC) -c $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -J$(OBJDIR) -I$(OBJDIR) -o $@ $< $(LAPACK_FLAGS)
 
 # object file dependencies
 $(B)asserts.obj : $(S)asserts.f90 $(B)text_output.obj
@@ -60,8 +62,10 @@ $(B)constants.obj : $(S)constants.f90
 
 $(B)enums.obj : $(S)enums.f90
 
-#$(B)forsat.obj : $(S)forsat.f90 $(B)constants.obj $(B)utils.obj
+#$(B)forsat.obj : $(S)forsat.f90 $(B)constants.obj $(B)prng_nums.obj
 $(B)forsat.obj : $(S)forsat.f90 $(addprefix $(B),$(OBJS))
+
+$(B)kalman.obj : $(S)kalman.f90 $(B)constants.obj
 
 $(B)logging.obj : $(S)logging.f90 $(B)constants.obj
 
@@ -89,5 +93,5 @@ $(B)vector_3d.obj : $(S)vector_3d.f90 $(B)constants.obj
 .PHONY : all clean forsat
 clean :
 	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod forsat.exe
-	$(TEST) -d $(OBJDIR) && $(RM) -r $(OBJDIR)
+	$(TEST) $(OBJDIR) && $(RM) -r $(OBJDIR)
 
