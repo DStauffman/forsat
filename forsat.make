@@ -1,6 +1,6 @@
 # compiler and flags
 FC      = gfortran
-FCFLAGS = -O3 -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -cpp
+FCFLAGS = -O3 -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -cpp -fPIC -shared
 DBFLAGS = -Og -g -Wall -fimplicit-none -fcheck=all -fbacktrace -Wno-maybe-uninitialized -fbounds-check
 LAPACK_FLAGS = -L/usr/lib/x86_64-linux-gnu -llapack
 
@@ -46,10 +46,13 @@ else
 endif
 
 # main executable
-all : forsat
+all : forsat forsat_shared
 
 forsat : $(S)forsat.f90 $(B)forsat.obj
 	$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o forsat.exe $(S)forsat.f90 -I$(OBJDIR) $(addprefix $(B),$(OBJS)) $(LAPACK_FLAGS)
+
+forsat_shared : $(addprefix $(B),$(OBJS))
+	$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o forsat.so -I$(OBJDIR) $(addprefix $(B),$(OBJS)) $(LAPACK_FLAGS)
 
 # object file implicit rules
 $(B)%.obj : $(S)%.f90
@@ -90,8 +93,7 @@ $(B)utils.obj : $(S)utils.f90 $(B)asserts.obj $(B)constants.obj $(B)matlab.obj $
 $(B)vector_3d.obj : $(S)vector_3d.f90 $(B)constants.obj
 
 # clean-up
-.PHONY : all clean forsat
+.PHONY : all clean forsat forsat_shared
 clean :
-	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod forsat.exe
+	$(RM) $(B)*.obj $(B)*.mod $(B)*.smod forsat.exe forsat.so
 	$(TEST) $(OBJDIR) && $(RM) -r $(OBJDIR)
-

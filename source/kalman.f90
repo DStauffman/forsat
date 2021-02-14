@@ -35,7 +35,6 @@ module kalman
 
 contains
 
-    !! eye
     pure function eye(n) result(res)
         ! inputs and outputs
         integer, intent(in) :: n
@@ -48,7 +47,6 @@ contains
         end do
     end function eye
 
-    !! mat_divide
     function mat_divide_2d_2d(a, b) result(res)
         ! inputs and outputs
         real(RK), dimension(:, :), intent(in)  :: a
